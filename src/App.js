@@ -2,7 +2,7 @@ import React from 'react';
 
 import './App.css';
 import BurguerBuilder from './containers/BurguerBuilder/BurguerBuilder';
-import Layout from './components/Layout/Layout';
+import Layout from './hoc/Layout/Layout';
 
 function App() {
   return (
