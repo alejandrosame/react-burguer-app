@@ -5,6 +5,9 @@ import axios from '../../../axios-orders';
 import Button from '../../../components/UI/Button/Button';
 import Input from '../../../components/UI/Input/Input';
 import Spinner from '../../../components/UI/Spinner/Spinner';
+import withErrorHandler from '../../../hoc/withErrorHandler/withErrorHandler';
+
+import * as actions from '../../../store/actions';
 
 import classes from './ContactData.module.css';
 
@@ -90,8 +93,7 @@ class ContactData extends React.Component {
         touched: false
       },
     },
-    formIsValid: false,
-    loading: false
+    formIsValid: false
   }
 
   orderHandler = (event) => {
@@ -117,14 +119,7 @@ class ContactData extends React.Component {
       orderData: formData
     }
 
-    axios.post( '/orders.json', order )
-      .then( response => {
-        this.setState( { loading: false } );
-        this.props.history.push('/');
-      } )
-      .catch( error => {
-        this.setState( { loading: false } );
-      } );
+    this.props.onOrderBurguer(order);
   }
 
   checkValidity(value, rules) {
@@ -195,7 +190,7 @@ class ContactData extends React.Component {
       </form>
     );
 
-    if (this.state.loading) {
+    if (this.props.loading) {
       form = <Spinner />
     }
 
@@ -210,9 +205,18 @@ class ContactData extends React.Component {
 
 const mapStateToProps = state => {
   return {
-    ingredients: state.ingredients,
-    price: state.totalPrice
+    ingredients: state.burguerBuilder.ingredients,
+    price: state.burguerBuilder.totalPrice,
+    loading: state.order.loading
   };
 };
 
-export default connect(mapStateToProps)(ContactData);
+const dispatchToProps = dispatch => {
+  return {
+    onOrderBurguer: (orderData) => dispatch(actions.purchaseBurguer(orderData))
+  };
+};
+
+export default connect(mapStateToProps, dispatchToProps)(
+  withErrorHandler(ContactData, axios)
+);

@@ -1,11 +1,11 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
-import * as actionTypes from '../../store/actions';
 import Aux from '../../hoc/Aux/Aux';
 import axios from '../../axios-orders';
 import BuildControls from '../../components/Burguer/BuildControls/BuildControls';
 import Burguer from '../../components/Burguer/Burguer'
+import * as actions from '../../store/actions';
 import Modal from '../../components/UI/Modal/Modal';
 import OrderSummary from '../../components/Burguer/OrderSummary/OrderSummary';
 import Spinner from '../../components/UI/Spinner/Spinner';
@@ -15,17 +15,11 @@ import withErrorHandler from '../../hoc/withErrorHandler/withErrorHandler';
 class BurguerBuilder extends React.Component {
 
   state = {
-    purchasing: false,
-    loading: false,
-    error: false
+    purchasing: false
   }
 
   componentDidMount(){
-    axios.get('ingredients.json')
-      .then( response => {
-        this.setState({ ingredients: response.data })
-      })
-      .catch(error => this.setState({error: true}));
+    this.props.onInitIngredients();
   }
 
   updatePurchaseState(ingredients) {
@@ -49,6 +43,7 @@ class BurguerBuilder extends React.Component {
   }
 
   purchaseContinueHandler = () => {
+    this.props.onInitPurchase();
     this.props.history.push('/checkout');
   }
 
@@ -62,7 +57,7 @@ class BurguerBuilder extends React.Component {
     }
 
     let orderSummary = null;
-    let burguer = this.state.error ? <p>Ingredients can't be loaded!</p> : <Spinner />;
+    let burguer = this.props.error ? <p>Ingredients can't be loaded!</p> : <Spinner />;
 
   if (this.props.ingredients){
       burguer = (
@@ -87,10 +82,6 @@ class BurguerBuilder extends React.Component {
       />;
     }
 
-    if (this.state.loading){
-      orderSummary = <Spinner />
-    }
-
     return (
       <Aux>
         <Modal
@@ -107,23 +98,21 @@ class BurguerBuilder extends React.Component {
 
 const mapStateToProps = state => {
   return {
-    ingredients: state.ingredients,
-    totalPrice: state.totalPrice
+    ingredients: state.burguerBuilder.ingredients,
+    totalPrice: state.burguerBuilder.totalPrice,
+    error: state.burguerBuilder.error
   };
 };
 
 const mapDispatchToProps = dispatch => {
   return {
-    onIngredientAdded: (ingredientName) => dispatch({
-      type: actionTypes.ADD_INGREDIENT,
-      ingredientName: ingredientName
-    }),
-    onIngredientRemoved: (ingredientName) => dispatch({
-      type: actionTypes.REMOVE_INGREDIENT,
-      ingredientName: ingredientName
-    })
+    onIngredientAdded: (ingredientName) => dispatch(actions.addIngredient(ingredientName)),
+    onIngredientRemoved: (ingredientName) => dispatch(actions.removeIngredient(ingredientName)),
+    onInitIngredients: () => dispatch(actions.initIngredients()),
+    onInitPurchase: () => dispatch(actions.purchaseInit())
   };
 };
+
 
 export default connect(mapStateToProps, mapDispatchToProps)(
   withErrorHandler(BurguerBuilder, axios
