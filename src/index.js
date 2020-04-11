@@ -8,12 +8,14 @@ import thunk from 'redux-thunk';
 import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
+import authReducer from './store/reducers/auth';
 import burguerBuilderReducer from './store/reducers/buguerBuilder';
 import orderReducer from './store/reducers/order';
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
 const rootReducer = combineReducers({
+  auth: authReducer,
   burguerBuilder: burguerBuilderReducer,
   order: orderReducer
 });

@@ -35,7 +35,12 @@ class BurguerBuilder extends React.Component {
   }
 
   purchaseHandler = () => {
-    this.setState({purchasing: true});
+    if (this.props.isAuthenticated){
+      this.setState({purchasing: true});
+    } else {
+      this.props.onSetAuthRedirectPath('/checkout');
+      this.props.history.push('/auth');
+    }
   }
 
   purchaseCancelHandler = () => {
@@ -57,9 +62,13 @@ class BurguerBuilder extends React.Component {
     }
 
     let orderSummary = null;
-    let burguer = this.props.error ? <p>Ingredients can't be loaded!</p> : <Spinner />;
+    let burguer = (
+      this.props.error
+        ? <p>Ingredients can't be loaded!</p>
+        : <Spinner />
+    );
 
-  if (this.props.ingredients){
+    if (this.props.ingredients){
       burguer = (
         <Aux>
           <Burguer ingredients={this.props.ingredients}/>
@@ -69,6 +78,7 @@ class BurguerBuilder extends React.Component {
             disabled={disabledInfo}
             purchasable={this.updatePurchaseState(this.props.ingredients)}
             ordered={this.purchaseHandler}
+            isAuth={this.props.isAuthenticated}
             price={this.props.totalPrice}
           />
         </Aux>
@@ -100,7 +110,8 @@ const mapStateToProps = state => {
   return {
     ingredients: state.burguerBuilder.ingredients,
     totalPrice: state.burguerBuilder.totalPrice,
-    error: state.burguerBuilder.error
+    error: state.burguerBuilder.error,
+    isAuthenticated: state.auth.token !== null
   };
 };
 
@@ -109,11 +120,12 @@ const mapDispatchToProps = dispatch => {
     onIngredientAdded: (ingredientName) => dispatch(actions.addIngredient(ingredientName)),
     onIngredientRemoved: (ingredientName) => dispatch(actions.removeIngredient(ingredientName)),
     onInitIngredients: () => dispatch(actions.initIngredients()),
-    onInitPurchase: () => dispatch(actions.purchaseInit())
+    onInitPurchase: () => dispatch(actions.purchaseInit()),
+    onSetAuthRedirectPath: (path) => dispatch(actions.setAuthRedirectPath(path))
   };
 };
 
 
 export default connect(mapStateToProps, mapDispatchToProps)(
-  withErrorHandler(BurguerBuilder, axios
-));
+  withErrorHandler(BurguerBuilder, axios)
+);
