@@ -7,6 +7,7 @@ import Input from '../../../components/UI/Input/Input';
 import Spinner from '../../../components/UI/Spinner/Spinner';
 import withErrorHandler from '../../../hoc/withErrorHandler/withErrorHandler';
 
+import { checkValidity, updateObject } from '../../../shared/utility';
 import * as actions from '../../../store/actions';
 
 import classes from './ContactData.module.css';
@@ -123,29 +124,21 @@ class ContactData extends React.Component {
     this.props.onOrderBurguer(this.props.token, order);
   }
 
-  checkValidity(value, rules) {
-    let isValid = false;
-    if (rules.required) {
-      isValid = value.trim() !== '';
-    }
-    return isValid;
-  }
-
   inputChangedHandler = (event, inputIdentifier) => {
-    const updatedOrderForm = {
-      ...this.state.orderForm
-    };
-
-    const updatedOrderFormElement = {
-      ...updatedOrderForm[inputIdentifier]
-    };
-
-    updatedOrderFormElement.touched = true;
-    updatedOrderFormElement.value = event.target.value;
-    updatedOrderFormElement.valid = this.checkValidity(
-        event.target.value, updatedOrderFormElement.validation
+    const updatedOrderFormElement = updateObject(this.state.orderForm[inputIdentifier],
+      {
+        touched: true,
+        valid: checkValidity(
+          event.target.value,
+          this.state.orderForm[inputIdentifier].validation
+        ),
+        value: event.target.value
+      }
     );
-    updatedOrderForm[inputIdentifier] = updatedOrderFormElement;
+
+    const updatedOrderForm = updateObject(this.state.orderForm, {
+      [inputIdentifier]: updatedOrderFormElement
+    });
 
     let formIsValid = true;
     for ( let inputIdentifier in updatedOrderForm ){
