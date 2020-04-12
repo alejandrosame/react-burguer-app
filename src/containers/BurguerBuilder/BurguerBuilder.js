@@ -12,7 +12,7 @@ import Spinner from '../../components/UI/Spinner/Spinner';
 
 import withErrorHandler from '../../hoc/withErrorHandler/withErrorHandler';
 
-class BurguerBuilder extends React.Component {
+export class BurguerBuilder extends React.Component {
 
   state = {
     purchasing: false
